@@ -1,0 +1,53 @@
+tree is
+
+  # get cmd line arg if it exists, parse as i32 and use 12 as default or
+  # in case of error:
+  #
+  size := ((envir.args.drop 1).head.bind i32 x->x.parse_i32.as_option).get 12
+
+  # our building blocks, using ANSI colors from terminal module:
+  leafs  := "#".green
+  orna1  := "@".red
+  orna2  := "@".cyan
+  orna3  := "@".purple
+  candle := "*".yellow
+
+  # trunk width should grow, but be odd for nice centering
+  trunkw := 1 + size/8*2
+  trunk  := " " * (size-trunkw/2) + "#" * trunkw
+
+  # function to randomly select a decoration
+  #
+  decoration =>
+   a := [orna1, orna2, orna3, candle, leafs]
+   a[random.next_i32 a.length]
+
+  # function to create n-th layer counting from top
+  #
+  layer(n i32) =>
+    # start with indentation and leafs
+    start := " "*(size-n) + leafs
+
+    for
+      # first set res to start, then to next after each iteration
+      res := start, next
+
+      # iterate from 0 to n-1
+      i in 0..n-1
+
+      # surround deco by leafs
+      deco := if (i|n)%%2 then decoration else leafs
+
+      # next becomes res with deco and leafs added
+      next := res + deco + leafs
+
+    else
+      res              # when done, return res
+
+  # draw the treetop
+  for i in 0..size do
+    say (layer i)
+
+  # draw the trunk
+  for _ in 0..trunkw do
+    say trunk
